@@ -21,59 +21,42 @@ The function names are scoped as struct fields on one side and by module on anot
 
 ## Advantages
 - Reduces possible name collisions for functions while reducing extra typing
+
 A library can contain tens, hundreds and thousands of functions. It is possible that one of them collides with another function with another library. Since C language doesn't have namespaces, the library developers have started to namespace functions by appending `LIBRARY_` to the function names. This doesn't guarantee that the functions won't collide but it significantly reduces the possibility of the collision.
 
 However with my approach there *Isn't even a possibility* that the functions will collide. Since the functions are struct members and the struct members don't collide.
 
-Of couse this approach doesn't guarantee that library types, library defines and the loader function won't collide. However as with other libraries you can do the following:
-```c
-
-#ifndef LIBRARY_TYPE_PREFIX
-#define LIBRARY_TYPE_PREFIX library_
-#endif
-
-#define prefix(t) LIBRARY_TYPE_PREFIX ## t
-
-typedef struct{int a; int b;} prefix(my_type);
-```
-
-However this will require a lot of typing in the header file (which will be typically slow).
+Of couse this approach doesn't guarantee that library types, library defines and the loader function won't collide. 
 
 - Ease of development
 
-The library source code isn't required to use prefixes for it's names and it's types. So inside the library source code you can define prefix to be empty
-```c
-#define LIBRARY_TYPE_PREFIX
-```
-Thus when including header file, the source code of the library will get all the type names unprefixed, which makes the development of library a bit less painful and reduces typing in large libraries.
+The library source code isn't required to use prefixes for it's names and it's types (since it is in another translation unit). This can significantly reduce typing.
+
+- Private/Public procedures
+
+Provides easy way to hide procedures that aren't supposed to be used by the user of the library (unlike single header libraries, that expose all procedures). That way the library can have however much procedures it wants to have and they can be named whatever you want, and you can arbitrarily choose which functions will make the API of the library.
+
+- Simple versioning
+
+The versioning can be done smartly by changing `MAJOR` and `MINOR` versions of the library. Those exists purely for the function of determining compatability. If new function is added to the library in a compatible way, `MINOR` is increased. This lets user use dll that has greater or equal amount of compatible functions that the user requires. However if the library introduces interface change, the `MAJOR` is increased. If majors don't match the library wouldn't be loaded. 
+
+This is "simple" because if in one release the library introduces a new function (increasing `MINOR`), and in the next one updates the call to this function (updating `MAJOR`), the user could technically use the other functions in compatible mode. This library doesn't provide versioning system for each function separately, but it can theoretically be implemented, however it will complicate the library internals significantly.
 
 ## Disatvantages
 
 - Implies the usage of dynamic linking
 
-Can not be a single-header library. Can impact startup performance a little.
+Can not be a single-header library. Can not be linked statically.
 
 - Possible portability issues
 
 Not sure if that is true, but be aware. Some platforms may have different mechanisms of providing memory safety and module dynamic loading, so it might not work in some cases.
 
-- Not backwards compatible
-
-Loading a `.dll` that expects has different number or parameters of the functions from expected will result stack corruption.
-
-- Can have performance impacts on function calls
-
-I'm not sure whether calling a function from a struct has any performance impacts, I didn't check.
-
-- Can be harder for introducing new functionality, compared to single header and other types of libraries.
-
-Since you would have to
-    1. Add new function definition.
-    2. Load the pointer into the struct.
-    3. Declare the function inside the struct.
-
 Also the functions are cast to `void *` before being assigned. That could lead to potential bugs during the development related to not matching function signatures in the library and in the interface. (suggestion not to cast functions to `void *`)
+
 
 ## Possible improvements
 
 - Prefix types using macro, have empty prefix in the library code and user defined prefix in the library.
+- Store vtable of functions inside the dll, not in the user code. Return the pointer to the table to the user. That will get rid of stack overwrites and provide a ways of extending the API in backwards compatible way
+- Versioning. Define library version, and if majors don't match in the DLL and the client, refuse to load the library and signal about it to the user.

@@ -1,7 +1,7 @@
 
 #include"dll.h"
 
-static vec2 bread_math_add_v2(vec2 a, vec2 b) {
+static vec2 add_v2(vec2 a, vec2 b) {
   vec2 result = {
     .x = a.x + b.x,
     .y = a.y + b.y
@@ -9,7 +9,7 @@ static vec2 bread_math_add_v2(vec2 a, vec2 b) {
   return result;
 }
 
-static vec2 bread_math_add_r4(vec2 a, float b) {
+static vec2 add_r4(vec2 a, float b) {
   vec2 result = {
     .x = a.x + b,
     .y = a.y + b
@@ -17,7 +17,7 @@ static vec2 bread_math_add_r4(vec2 a, float b) {
   return result;
 }
 
-static vec2 bread_math_mul_r4(vec2 a, float b) {
+static vec2 mul_r4(vec2 a, float b) {
   vec2 result = {
     .x = a.x * b,
     .y = a.y * b
@@ -25,24 +25,31 @@ static vec2 bread_math_mul_r4(vec2 a, float b) {
   return result;
 }
 
-static float bread_math_dot(vec2 a, vec2 b) {
+static float dot(vec2 a, vec2 b) {
   return a.x*b.x + a.y*b.y;
 }
 
 #include<math.h>
-float bread_math_len(vec2 a) {
+float len(vec2 a) {
   return sqrtf(a.x*a.x + a.y*a.y);
 }
 
-vec2 bread_math_normalof(vec2 a) {
-  return bread_math_mul_r4(a, 1.0 / bread_math_len(a));
+vec2 normalof(vec2 a) {
+  return mul_r4(a, 1.0 / len(a));
 }
 
-__declspec(dllexport) void load(t_bread_math *lib) {
-  lib->add_v2 = (void *)(&bread_math_add_v2);
-  lib->add_r4 = (void *)(&bread_math_add_r4);
-  lib->mul_r4 = (void *)(&bread_math_mul_r4);
-  lib->dot = (void *)(&bread_math_dot);
-  lib->len = (void *)(&bread_math_len);
-  lib->normalof = (void *)(&bread_math_normalof);
+static t_bread_lib_ptable pointers = {
+  .add_v2 = &add_v2,
+  .add_r4 = &add_r4,
+  .mul_r4 = &mul_r4,
+  .dot = &dot,
+  .len = &len,
+  .normalof = &normalof,
+};
+
+__declspec(dllexport) int load(t_bread_math *lib, unsigned maj, unsigned min) {
+  if(maj != BREAD_LIBRARY_MAJOR) return 0; // reject if incompatible
+  if(min > BREAD_LIBRARY_MINOR) return 0; // reject if user expects functions that don't exist
+  *lib = &pointers;
+  return 1;
 }
