@@ -1,7 +1,7 @@
 
 #include"dll.h"
 
-vec2 bread_math_add_v2(vec2 a, vec2 b) {
+static vec2 bread_math_add_v2(vec2 a, vec2 b) {
   vec2 result = {
     .x = a.x + b.x,
     .y = a.y + b.y
@@ -9,7 +9,7 @@ vec2 bread_math_add_v2(vec2 a, vec2 b) {
   return result;
 }
 
-vec2 bread_math_add_r4(vec2 a, float b) {
+static vec2 bread_math_add_r4(vec2 a, float b) {
   vec2 result = {
     .x = a.x + b,
     .y = a.y + b
@@ -17,7 +17,7 @@ vec2 bread_math_add_r4(vec2 a, float b) {
   return result;
 }
 
-vec2 bread_math_mul_r4(vec2 a, float b) {
+static vec2 bread_math_mul_r4(vec2 a, float b) {
   vec2 result = {
     .x = a.x * b,
     .y = a.y * b
@@ -25,7 +25,7 @@ vec2 bread_math_mul_r4(vec2 a, float b) {
   return result;
 }
 
-float bread_math_dot(vec2 a, vec2 b) {
+static float bread_math_dot(vec2 a, vec2 b) {
   return a.x*b.x + a.y*b.y;
 }
 
