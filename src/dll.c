@@ -38,7 +38,7 @@ vec2 normalof(vec2 a) {
   return mul_r4(a, 1.0 / len(a));
 }
 
-static t_bread_lib_ptable pointers = {
+static t_bread_math pointers = {
   .add_v2 = &add_v2,
   .add_r4 = &add_r4,
   .mul_r4 = &mul_r4,
@@ -47,7 +47,7 @@ static t_bread_lib_ptable pointers = {
   .normalof = &normalof,
 };
 
-__declspec(dllexport) int load(t_bread_math *lib, unsigned maj, unsigned min) {
+__declspec(dllexport) int load(t_bread_math **lib, unsigned maj, unsigned min) {
   if(maj != BREAD_LIBRARY_MAJOR) return 0; // reject if incompatible
   if(min > BREAD_LIBRARY_MINOR) return 0; // reject if user expects functions that don't exist
   *lib = &pointers;

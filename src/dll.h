@@ -25,7 +25,7 @@ struct {
   vec2 (*normalof)(vec2);
   // t_bread_lib_ptable declares internal pointer table for the interface, 
   // t_bread_math declares user-facing library interface abstraction
-} typedef t_bread_lib_ptable, *t_bread_math;
+} typedef t_bread_math;
 
 /* library loader */
 #ifdef __linux__ 
@@ -35,10 +35,10 @@ struct {
 // and calling into internal loader of the library.
 #include<Windows.h>
 #pragma comment(lib, "user32.lib")
-int bread__load_lib(t_bread_math *lib, char *dll_name) {
+int bread__load_lib(t_bread_math **lib, char *dll_name) {
   HMODULE libraryHandle = LoadLibraryA(dll_name);
   if(!libraryHandle) return 0;
-  int (*load)(t_bread_math *, unsigned) = (void *)GetProcAddress(libraryHandle, "load");
+  int (*load)(t_bread_math **, unsigned) = (void *)GetProcAddress(libraryHandle, "load");
   if(!load) return 0;
   return load(lib, BREAD_LIBRARY_MAJOR);
 }

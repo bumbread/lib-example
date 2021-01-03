@@ -1,7 +1,7 @@
 #include<stdio.h>
 
 #include"dll.h"
-t_bread_math static math;
+t_bread_math static *math;
 
 int main(void) {
   

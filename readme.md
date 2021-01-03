@@ -1,23 +1,25 @@
 ## Description
 
-This is an example of implementing a basic library performing simple algebra on 2 dimansional vectors, implemented using one of my ideas. The library is structured in such a way as to compromize the uglyness of functions and significantly reduce the possibility of namespace collisions. Function "namespacing" is done by putting all the library declarations inside a library namespacing struct. In order to use a library the library header defines a function that fills the struct with pointers. It is possible that the library will have several such structs and therefore will have several initalization functions and several possible feature sets. The loader function is in the user's module and is included together with the library header. The loader function loads the library's loader function that is contained in the library's DLL module. The library's module function fills the struct with function pointers. 
+This is an example of implementing a basic library performing simple algebra on 2 dimansional vectors, implemented using one of my ideas about library organisation and distribution. The library is structured in such a way as to compromize the uglyness of prefixed functions and significantly reduce the possibility of namespace collisions, as well as provide simple compatible interface between library and user code. 
 
-The usage of the library could look like this:
+The idea of the method is to do function "namespacing" by putting all the library declarations inside a struct defining the library interface. In order to use a library the library header defines a function that returns the pointer to that interface. It is possible that the library will have several such structs and therefore will have several initalization functions and several interfaces. The loader function is in the user's translation unit and is included together with the library header. The loader function loads the library's function that returns the pointer to the interface that library function also does version checking. The library interface is located in the library's translation unit.
+
+The usage of the library will look like this:
 ```c
-struct t_pref_library library;
+t_library_interface *library;
 
 user_code() {
+  if(0 == library_init(&library, "library.dll")) {
+    printf("wrong version of the DLL or DLL is not found!\n");
+    exit(1);
+  }
 
-    prefix_library_init(&library, "library.dll");
-    
-    library.callFunction1();
-    library.doSomething("cat");
-
+  library->callFunction1();
+  library->doSomething("cat");
 }
-
 ```
 
-The function names are scoped as struct fields on one side and by module on another side. So there is no names leaking into the global scope of the user module. Additionally the struct to be filled with pointers is named by the user so it delegates the responsibility of managing name collisions to the user (and that managing is basically the same as managing variable names, isn't very hard).
+The function names are scoped as struct fields on one side and by module on another side. So there is no function names leaking into the global scope of the user module. Additionally the struct to be filled with pointers is named by the user so it delegates the responsibility of managing name collisions to the user (and that managing is basically the same as managing variable names, so there is no overhead on the user side).
 
 ## Advantages
 - Reduces possible name collisions for functions while reducing extra typing
